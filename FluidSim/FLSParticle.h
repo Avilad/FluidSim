@@ -12,21 +12,21 @@
 
 @interface FLSParticle : NSObject {
     
-@public float distances[MAX_PARTICLES];
-@public int neighbors[MAX_PARTICLES];
+    @public float distances[MAX_PARTICLES];
+    @public int neighbors[MAX_PARTICLES];
+    
+    @public GLKVector2 position;
+    @public GLKVector2 velocity;
+    @public BOOL alive;
+    @public int index;
+    
+    @public int neighborCount;
+    @public int ci;
+    @public int cj;
+    
+    @private CGSize contentSize;
     
 }
-
-@property (assign) GLKVector2 position;
-@property (assign) GLKVector2 velocity;
-@property (assign) BOOL alive;
-@property (assign) int index;
-
-@property int neighborCount;
-@property int ci;
-@property int cj;
-
-@property (assign) CGSize contentSize;
 
 - (id)initWithFile:(NSString *)fileName effect:(GLKBaseEffect *)effect;
 - (void)render;

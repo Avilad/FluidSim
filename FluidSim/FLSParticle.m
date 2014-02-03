@@ -32,12 +32,6 @@ typedef struct {
 @synthesize effect = _effect;
 @synthesize quad = _quad;
 @synthesize textureInfo = _textureInfo;
-@synthesize position = _position;
-@synthesize contentSize = _contentSize;
-
-@synthesize neighborCount = _neighborCount;
-@synthesize ci = _ci;
-@synthesize cj = _cj;
 
 - (id)initWithFile:(NSString *)fileName effect:(GLKBaseEffect *)effect {
     if ((self = [super init])) {
@@ -60,7 +54,7 @@ typedef struct {
             return nil;
         }
         
-        self.contentSize = CGSizeMake(self.textureInfo.width, self.textureInfo.height);
+        contentSize = CGSizeMake(self.textureInfo.width, self.textureInfo.height);
         
         TexturedQuad newQuad;
         newQuad.bl.geometryVertex = CGPointMake(0, 0);
@@ -81,8 +75,8 @@ typedef struct {
 - (GLKMatrix4) modelMatrix {
     
     GLKMatrix4 modelMatrix = GLKMatrix4Identity;
-    modelMatrix = GLKMatrix4Translate(modelMatrix, self.position.x*scale, self.position.y*scale, 0);
-    modelMatrix = GLKMatrix4Translate(modelMatrix, -self.contentSize.width/2, -self.contentSize.height/2, 0);
+    modelMatrix = GLKMatrix4Translate(modelMatrix, position.x*scale, position.y*scale, 0);
+    modelMatrix = GLKMatrix4Translate(modelMatrix, -contentSize.width/2, -contentSize.height/2, 0);
     return modelMatrix;
     
 }
