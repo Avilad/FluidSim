@@ -17,16 +17,15 @@
 		62B4E2D1189BC9AA009D8BE5 /* FLSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E2D0189BC9AA009D8BE5 /* FLSAppDelegate.m */; };
 		62B4E2D4189BC9AA009D8BE5 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2D2189BC9AA009D8BE5 /* Main_iPhone.storyboard */; };
 		62B4E2D7189BC9AA009D8BE5 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2D5189BC9AA009D8BE5 /* Main_iPad.storyboard */; };
-		62B4E2DE189BC9AA009D8BE5 /* FLSViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E2DD189BC9AA009D8BE5 /* FLSViewController.mm */; };
+		62B4E2DE189BC9AA009D8BE5 /* FLSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E2DD189BC9AA009D8BE5 /* FLSViewController.m */; };
 		62B4E2E0189BC9AA009D8BE5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2DF189BC9AA009D8BE5 /* Images.xcassets */; };
 		62B4E2E7189BC9AA009D8BE5 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2E6189BC9AA009D8BE5 /* XCTest.framework */; };
 		62B4E2E8189BC9AA009D8BE5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2BC189BC9AA009D8BE5 /* Foundation.framework */; };
 		62B4E2E9189BC9AA009D8BE5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2C0189BC9AA009D8BE5 /* UIKit.framework */; };
 		62B4E2F1189BC9AA009D8BE5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2EF189BC9AA009D8BE5 /* InfoPlist.strings */; };
 		62B4E2F3189BC9AA009D8BE5 /* FluidSimTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E2F2189BC9AA009D8BE5 /* FluidSimTests.m */; };
-		62B4E2FE189BC9FA009D8BE5 /* FLSParticle.m in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E2FD189BC9FA009D8BE5 /* FLSParticle.m */; };
 		62B4E300189BCA1A009D8BE5 /* Particle.png in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2FF189BCA1A009D8BE5 /* Particle.png */; };
-		62B4E303189BF6F7009D8BE5 /* FLSGlobals.m in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E302189BF6F7009D8BE5 /* FLSGlobals.m */; };
+		62F42A4A18A0EBFD0037AA88 /* FLSLiquid.mm in Sources */ = {isa = PBXBuildFile; fileRef = 62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,18 +54,16 @@
 		62B4E2D3189BC9AA009D8BE5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
 		62B4E2D6189BC9AA009D8BE5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		62B4E2DC189BC9AA009D8BE5 /* FLSViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FLSViewController.h; sourceTree = "<group>"; };
-		62B4E2DD189BC9AA009D8BE5 /* FLSViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FLSViewController.mm; sourceTree = "<group>"; };
+		62B4E2DD189BC9AA009D8BE5 /* FLSViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FLSViewController.m; sourceTree = "<group>"; };
 		62B4E2DF189BC9AA009D8BE5 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		62B4E2E5189BC9AA009D8BE5 /* FluidSimTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FluidSimTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		62B4E2E6189BC9AA009D8BE5 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		62B4E2EE189BC9AA009D8BE5 /* FluidSimTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FluidSimTests-Info.plist"; sourceTree = "<group>"; };
 		62B4E2F0189BC9AA009D8BE5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		62B4E2F2189BC9AA009D8BE5 /* FluidSimTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FluidSimTests.m; sourceTree = "<group>"; };
-		62B4E2FC189BC9FA009D8BE5 /* FLSParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSParticle.h; sourceTree = "<group>"; };
-		62B4E2FD189BC9FA009D8BE5 /* FLSParticle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLSParticle.m; sourceTree = "<group>"; };
 		62B4E2FF189BCA1A009D8BE5 /* Particle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Particle.png; sourceTree = "<group>"; };
-		62B4E301189BF6F7009D8BE5 /* FLSGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSGlobals.h; sourceTree = "<group>"; };
-		62B4E302189BF6F7009D8BE5 /* FLSGlobals.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLSGlobals.m; sourceTree = "<group>"; };
+		62F42A4818A0EBFD0037AA88 /* FLSLiquid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSLiquid.h; sourceTree = "<group>"; };
+		62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FLSLiquid.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,14 +129,12 @@
 			children = (
 				62B4E2CF189BC9AA009D8BE5 /* FLSAppDelegate.h */,
 				62B4E2D0189BC9AA009D8BE5 /* FLSAppDelegate.m */,
-				62B4E2FC189BC9FA009D8BE5 /* FLSParticle.h */,
-				62B4E2FD189BC9FA009D8BE5 /* FLSParticle.m */,
+				62F42A4818A0EBFD0037AA88 /* FLSLiquid.h */,
+				62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */,
 				62B4E2D2189BC9AA009D8BE5 /* Main_iPhone.storyboard */,
 				62B4E2D5189BC9AA009D8BE5 /* Main_iPad.storyboard */,
 				62B4E2DC189BC9AA009D8BE5 /* FLSViewController.h */,
-				62B4E2DD189BC9AA009D8BE5 /* FLSViewController.mm */,
-				62B4E301189BF6F7009D8BE5 /* FLSGlobals.h */,
-				62B4E302189BF6F7009D8BE5 /* FLSGlobals.m */,
+				62B4E2DD189BC9AA009D8BE5 /* FLSViewController.m */,
 				62B4E2DF189BC9AA009D8BE5 /* Images.xcassets */,
 				62B4E2FF189BCA1A009D8BE5 /* Particle.png */,
 				62B4E2C7189BC9AA009D8BE5 /* Supporting Files */,
@@ -294,10 +289,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				62B4E2D1189BC9AA009D8BE5 /* FLSAppDelegate.m in Sources */,
-				62B4E2FE189BC9FA009D8BE5 /* FLSParticle.m in Sources */,
+				62F42A4A18A0EBFD0037AA88 /* FLSLiquid.mm in Sources */,
 				62B4E2CD189BC9AA009D8BE5 /* main.m in Sources */,
-				62B4E2DE189BC9AA009D8BE5 /* FLSViewController.mm in Sources */,
-				62B4E303189BF6F7009D8BE5 /* FLSGlobals.m in Sources */,
+				62B4E2DE189BC9AA009D8BE5 /* FLSViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,7 +432,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FluidSim/FluidSim-Prefix.pch";
 				INFOPLIST_FILE = "FluidSim/FluidSim-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -454,7 +448,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FluidSim/FluidSim-Prefix.pch";
 				INFOPLIST_FILE = "FluidSim/FluidSim-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

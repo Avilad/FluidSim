@@ -1,36 +1,81 @@
 //
-//  FLSViewController.m
+//  FLSLiquid.m
 //  FluidSim
 //
-//  Created by SlEePlEs5 on 1/28/14.
+//  Created by SlEePlEs5 on 2/4/14.
 //  Copyright (c) 2014 SlEePlEs5. All rights reserved.
 //
 
-#import "FLSViewController.h"
-#import "FLSParticle.h"
-#import "FLSGlobals.h"
+#import "FLSLiquid.h"
 #import <array>
 #import <unordered_set>
 #import <unordered_map>
 
 using namespace std;
 
-@interface FLSViewController ()
+#define MAX_PARTICLES 1000
+#define RADIUS 0.6f
+#define VISCOSITY 0.000f
+#define IDEAL_RADIUS 50.0f
 
-@property (strong, nonatomic) EAGLContext *context;
-@property (strong) GLKBaseEffect *effect;
+typedef struct FLSParticle
+{
+    float distances[MAX_PARTICLES];
+    int neighbors[MAX_PARTICLES];
+    
+    GLKVector2 position;
+    GLKVector2 velocity;
+    BOOL alive;
+    int index;
+    
+    int neighborCount;
+    int ci;
+    int cj;
+}
+FLSParticle;
+
+
+// BEGIN TEMPORARY / DEBUG RENDERING CODE
+
+
+typedef struct {
+    CGPoint geometryVertex;
+    CGPoint textureVertex;
+} TexturedVertex;
+
+typedef struct {
+    TexturedVertex bl;
+    TexturedVertex br;
+    TexturedVertex tl;
+    TexturedVertex tr;
+} TexturedQuad;
+
+@interface FLSLiquid()
+
+@property (strong) GLKBaseEffect * effect;
+@property (assign) TexturedQuad quad;
+@property (strong) GLKTextureInfo * textureInfo;
 
 @end
 
-@implementation FLSViewController
 
-@synthesize context = _context;
+// END TEMPORARY / DEBUG RENDERING CODE
 
-const float RADIUS = 0.6f;
-const float VISCOSITY = 0.000f;
+
+@implementation FLSLiquid
+
+
+// BEGIN TEMPORARY / DEBUG RENDERING CODE
+
+
+CGSize contentSize;
+
+
+// END TEMPORARY / DEBUG RENDERING CODE
+
+
 const float DT = 1.0f / 60.0f;
 
-const float IDEAL_RADIUS = 50.0f;
 const float MULTIPLIER = IDEAL_RADIUS / RADIUS;
 const float IDEAL_RADIUS_SQ = IDEAL_RADIUS * IDEAL_RADIUS;
 
@@ -44,80 +89,20 @@ GLKVector2 _delta[MAX_PARTICLES];
 GLKVector2 _scaledPositions[MAX_PARTICLES];
 GLKVector2 _scaledVelocities[MAX_PARTICLES];
 
-FLSParticle* _liquid[MAX_PARTICLES];
+FLSParticle _liquid[MAX_PARTICLES];
 unordered_set<size_t> _activeParticles;
 
 unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>> _grid;
 
-BOOL touching = false;
-GLKVector2 touchPos;
-GLKVector2 screenSize;
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    
-    srand(time(0));
-    
-    self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-    
-    if (!self.context) {
-        NSLog(@"Failed to create ES context");
-    }
-    
-    GLKView *view = (GLKView *)self.view;
-    view.context = self.context;
-    [EAGLContext setCurrentContext:self.context];
-    
-    self.effect = [[GLKBaseEffect alloc] init];
-    
-    CGRect screenRect = [[UIScreen mainScreen] bounds];
-    
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, screenRect.size.width, 0, screenRect.size.height, -1024, 1024);
-    
-    screenSize = GLKVector2Make(screenRect.size.width, screenRect.size.height);
-    
-    self.effect.transform.projectionMatrix = projectionMatrix;
-    
-    
-    
-    
-    
-    // Now, simulation stuff!
-    
-    
-    
-    
-    
-    _activeParticles = unordered_set<size_t>();
-    
-    _grid = unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>>();
-    
-    for (int i = 0; i < MAX_PARTICLES; i++)
-    {
-        
-        // Fill _liquid Array
-        
-        FLSParticle *particle = [[FLSParticle alloc] initWithFile:@"Particle.png" effect:self.effect];
-        particle->position = GLKVector2Make(0, 0);
-        particle->velocity = GLKVector2Make(0, 0);
-        particle->alive = NO;
-        particle->index = i;
-        _liquid[i] = particle;
-        
-    }
-    
-}
-
 void createParticle(float posX, float posY) {
     
-    FLSParticle* someInactiveParticles[PARTICLE_ADD_RATE];
+    FLSParticle *someInactiveParticles[PARTICLE_ADD_RATE];
     
     int count = 0;
     
     for (size_t i = 0; i < MAX_PARTICLES; i++) {
-        if (!_liquid[i]->alive) {
-            someInactiveParticles[count] = _liquid[i];
+        if (!_liquid[i].alive) {
+            someInactiveParticles[count] = &_liquid[i];
             count++;
         }
         if (count == PARTICLE_ADD_RATE) {
@@ -160,9 +145,9 @@ void createParticle(float posX, float posY) {
 void applyLiquidConstraints() {
     
     // Prepare simulation
-    for (int index : _activeParticles) {
+    for (size_t index : _activeParticles) {
         
-        FLSParticle *particle = _liquid[index];
+        FLSParticle *particle = &_liquid[index];
         
         // Scale positions and velocities
         _scaledPositions[index] = GLKVector2MultiplyScalar(particle->position, MULTIPLIER);
@@ -171,11 +156,11 @@ void applyLiquidConstraints() {
         // Reset deltas
         _delta[index] = GLKVector2Make(0, 0);
     }
-    for (int index : _activeParticles) {
+    for (size_t index : _activeParticles) {
         
-        FLSParticle *particle = _liquid[index];
+        FLSParticle *particle = &_liquid[index];
         
-        findNeighbors(particle);
+        findNeighbors(*particle);
         
         // Calculate pressure
         float p = 0.0f;
@@ -223,9 +208,9 @@ void applyLiquidConstraints() {
     }
     
     // Move particles
-    for (int index : _activeParticles) {
+    for (size_t index : _activeParticles) {
         
-        FLSParticle *particle = _liquid[index];
+        FLSParticle *particle = &_liquid[index];
         
         particle->position = GLKVector2Add(particle->position, GLKVector2MultiplyScalar(_delta[index], 1 / MULTIPLIER));
         particle->velocity = GLKVector2Add(particle->velocity, GLKVector2MultiplyScalar(_delta[index], 1 / (MULTIPLIER * DT)));
@@ -235,7 +220,7 @@ void applyLiquidConstraints() {
         int y = getGridY(particle->position.y);
         
         if (particle->ci == x && particle->cj == y)
-        continue;
+            continue;
         else {
             
             _grid.at(particle->ci).at(particle->cj).erase(index);
@@ -250,24 +235,24 @@ void applyLiquidConstraints() {
             }
             
             if (_grid.find(x) == _grid.end())
-            _grid.insert(make_pair(x, unordered_map<size_t, unordered_set<size_t>>()));
+                _grid.insert(make_pair(x, unordered_map<size_t, unordered_set<size_t>>()));
             if (_grid.at(x).find(y) == _grid.at(x).end())
-            _grid.at(x).insert(make_pair(y, unordered_set<size_t>()));
+                _grid.at(x).insert(make_pair(y, unordered_set<size_t>()));
             _grid.at(x).at(y).insert(index);
             particle->ci = x;
             particle->cj = y;
         }
     }
 }
-void findNeighbors(FLSParticle *particle) {
-    particle->neighborCount = 0;
+void findNeighbors(FLSParticle &particle) {
+    particle.neighborCount = 0;
     
     for (int nx = -1; nx < 2; nx++) {
         
         for (int ny = -1; ny < 2; ny++) {
             
-            int x = particle->ci + nx;
-            int y = particle->cj + ny;
+            int x = particle.ci + nx;
+            int y = particle.cj + ny;
             //if (grid.TryGetValue(x, out gridX) && gridX.TryGetValue(y, out gridY)) {
             if (_grid.find(x) != _grid.end()) {
                 
@@ -277,13 +262,13 @@ void findNeighbors(FLSParticle *particle) {
                     
                     for (size_t neighbourIndex : gridY) {
                         
-                        if (neighbourIndex != particle->index) {
+                        if (neighbourIndex != particle.index) {
                             
-                            particle->neighbors[particle->neighborCount] = neighbourIndex;
-                            particle->neighborCount++;
+                            particle.neighbors[particle.neighborCount] = (int)neighbourIndex;
+                            particle.neighborCount++;
                             
-                            if (particle->neighborCount >= MAX_NEIGHBORS)
-                            return;
+                            if (particle.neighborCount >= MAX_NEIGHBORS)
+                                return;
                         }
                     }
                 }
@@ -298,72 +283,132 @@ int getGridY(float y) {
     return (int)floorf(y / CELL_SIZE);
 }
 
-// End sim stuff.
+
+// BEGIN TEMPORARY / DEBUG RENDERING CODE
 
 
-
-
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return UIInterfaceOrientationIsPortrait(interfaceOrientation);
+GLKMatrix4 modelMatrix(float x, float y) {
+    
+    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+    modelMatrix = GLKMatrix4Translate(modelMatrix, x*scale, y*scale, 0);
+    modelMatrix = GLKMatrix4Translate(modelMatrix, -contentSize.width/2, -contentSize.height/2, 0);
+    return modelMatrix;
+    
 }
 
-#pragma mark - GLKViewDelegate
 
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
+// END TEMPORARY / DEBUG RENDERING CODE
+
+
+-(id)initWithParticleTexture:(NSString *)fileName effect:(GLKBaseEffect *)effect {
     
-    glClearColor(1, 1, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    
-    for (size_t i : _activeParticles) {
+    if ((self = [super init])) {
         
-        [_liquid[i] render];
+        
+        // BEGIN TEMPORARY / DEBUG RENDERING CODE
+        
+        
+        // 1
+        self.effect = effect;
+        
+        // 2
+        NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  [NSNumber numberWithBool:YES],
+                                  GLKTextureLoaderOriginBottomLeft,
+                                  nil];
+        
+        // 3
+        NSError * error;
+        NSString *path = [[NSBundle mainBundle] pathForResource:fileName ofType:nil];
+        // 4
+        self.textureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
+        if (self.textureInfo == nil) {
+            NSLog(@"Error loading file: %@", [error localizedDescription]);
+            return nil;
+        }
+        
+        contentSize = CGSizeMake(self.textureInfo.width, self.textureInfo.height);
+        
+        TexturedQuad newQuad;
+        newQuad.bl.geometryVertex = CGPointMake(0, 0);
+        newQuad.br.geometryVertex = CGPointMake(self.textureInfo.width, 0);
+        newQuad.tl.geometryVertex = CGPointMake(0, self.textureInfo.height);
+        newQuad.tr.geometryVertex = CGPointMake(self.textureInfo.width, self.textureInfo.height);
+        
+        newQuad.bl.textureVertex = CGPointMake(0, 0);
+        newQuad.br.textureVertex = CGPointMake(1, 0);
+        newQuad.tl.textureVertex = CGPointMake(0, 1);
+        newQuad.tr.textureVertex = CGPointMake(1, 1);
+        self.quad = newQuad;
+        
+        
+        // END TEMPORARY / DEBUG RENDERING CODE
+        
+        
+        _activeParticles = unordered_set<size_t>();
+        
+        _grid = unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>>();
+        
+        for (int i = 0; i < MAX_PARTICLES; i++)
+        {
+            
+            // Fill _liquid Array
+            
+            FLSParticle particle = {
+                .distances = {0},
+                .neighbors = {0},
+                .position = GLKVector2Make(0, 0),
+                .velocity = GLKVector2Make(0, 0),
+                .alive = NO,
+                .index = i,
+                .neighborCount = 0,
+                .ci = 0,
+                .cj = 0
+            };
+            _liquid[i] = particle;
+            
+        }
         
     }
+    return self;
+    
 }
-
-
-
-#pragma mark - GLKViewControllerDelegate
-
-- (void)update {
-    
-    //MouseState mouseState = Mouse.GetState();
-    
-    //_mouse = new Vector2(mouseState.X, mouseState.Y) / _scale;
-    //if (mouseState.LeftButton == ButtonState.Pressed)
-    
-    if (touching)
-        createParticle(touchPos.x/scale, (screenSize.y-touchPos.y)/scale);
+-(void)update {
     
     applyLiquidConstraints();
     
 }
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+-(void)render {
     
-    touching = YES;
-    
-    UITouch *touch = [[event allTouches] anyObject];
-    CGPoint touchLocation = [touch locationInView:[UIApplication sharedApplication].keyWindow];
-    
-    touchPos = GLKVector2Make(touchLocation.x, touchLocation.y);
+    for (size_t i : _activeParticles) {
+        
+        // 1
+        self.effect.texture2d0.name = self.textureInfo.name;
+        self.effect.texture2d0.enabled = YES;
+        
+        // 2
+        self.effect.transform.modelviewMatrix = modelMatrix(_liquid[i].position.x, _liquid[i].position.y);
+        [self.effect prepareToDraw];
+        
+        // 3
+        glEnableVertexAttribArray(GLKVertexAttribPosition);
+        glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
+        
+        // 4
+        long offset = (long)&_quad;
+        glVertexAttribPointer(GLKVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *) (offset + offsetof(TexturedVertex, geometryVertex)));
+        glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *) (offset + offsetof(TexturedVertex, textureVertex)));
+        
+        // 5
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        
+    }
     
 }
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    touching = NO;
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+-(void)createParticleWithPosX:(float)posX posY:(float)posY {
     
-    UITouch *touch = [[event allTouches] anyObject];
-    CGPoint touchLocation = [touch locationInView:[UIApplication sharedApplication].keyWindow];
+    createParticle(posX, posY);
     
-    touchPos = GLKVector2Make(touchLocation.x, touchLocation.y);
 }
 
 @end
