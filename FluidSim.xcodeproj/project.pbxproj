@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		62AE6CFF18A1559B00B73320 /* FLSLiquidParticleShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 62AE6CFE18A1559B00B73320 /* FLSLiquidParticleShader.m */; };
+		62AE6D0218A15A9000B73320 /* FLSShaderProcessor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 62AE6D0118A15A9000B73320 /* FLSShaderProcessor.mm */; };
 		62B4E2BD189BC9AA009D8BE5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2BC189BC9AA009D8BE5 /* Foundation.framework */; };
 		62B4E2BF189BC9AA009D8BE5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2BE189BC9AA009D8BE5 /* CoreGraphics.framework */; };
 		62B4E2C1189BC9AA009D8BE5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2C0189BC9AA009D8BE5 /* UIKit.framework */; };
@@ -39,6 +41,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		62AE6CFB18A14AA700B73320 /* LiquidParticle.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; path = LiquidParticle.vsh; sourceTree = "<group>"; };
+		62AE6CFC18A14AB700B73320 /* LiquidParticle.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; path = LiquidParticle.fsh; sourceTree = "<group>"; };
+		62AE6CFD18A1559B00B73320 /* FLSLiquidParticleShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSLiquidParticleShader.h; sourceTree = "<group>"; };
+		62AE6CFE18A1559B00B73320 /* FLSLiquidParticleShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLSLiquidParticleShader.m; sourceTree = "<group>"; };
+		62AE6D0018A15A9000B73320 /* FLSShaderProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSShaderProcessor.h; sourceTree = "<group>"; };
+		62AE6D0118A15A9000B73320 /* FLSShaderProcessor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FLSShaderProcessor.mm; sourceTree = "<group>"; };
 		62B4E2B9189BC9AA009D8BE5 /* FluidSim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FluidSim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		62B4E2BC189BC9AA009D8BE5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		62B4E2BE189BC9AA009D8BE5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -131,6 +139,12 @@
 				62B4E2D0189BC9AA009D8BE5 /* FLSAppDelegate.m */,
 				62F42A4818A0EBFD0037AA88 /* FLSLiquid.h */,
 				62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */,
+				62AE6CFD18A1559B00B73320 /* FLSLiquidParticleShader.h */,
+				62AE6CFE18A1559B00B73320 /* FLSLiquidParticleShader.m */,
+				62AE6D0018A15A9000B73320 /* FLSShaderProcessor.h */,
+				62AE6D0118A15A9000B73320 /* FLSShaderProcessor.mm */,
+				62AE6CFB18A14AA700B73320 /* LiquidParticle.vsh */,
+				62AE6CFC18A14AB700B73320 /* LiquidParticle.fsh */,
 				62B4E2D2189BC9AA009D8BE5 /* Main_iPhone.storyboard */,
 				62B4E2D5189BC9AA009D8BE5 /* Main_iPad.storyboard */,
 				62B4E2DC189BC9AA009D8BE5 /* FLSViewController.h */,
@@ -290,8 +304,10 @@
 			files = (
 				62B4E2D1189BC9AA009D8BE5 /* FLSAppDelegate.m in Sources */,
 				62F42A4A18A0EBFD0037AA88 /* FLSLiquid.mm in Sources */,
+				62AE6CFF18A1559B00B73320 /* FLSLiquidParticleShader.m in Sources */,
 				62B4E2CD189BC9AA009D8BE5 /* main.m in Sources */,
 				62B4E2DE189BC9AA009D8BE5 /* FLSViewController.m in Sources */,
+				62AE6D0218A15A9000B73320 /* FLSShaderProcessor.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

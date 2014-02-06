@@ -14,7 +14,7 @@ const float scale = 64.0f;
 
 @interface FLSLiquid : NSObject
 
--(id)initWithParticleTexture:(NSString *)fileName effect:(GLKBaseEffect *)effect;
+-(id)initWithScreenSize:(GLKVector2)screenSize;
 
 -(void)update;
 -(void)render;

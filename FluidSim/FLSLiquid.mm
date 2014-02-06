@@ -7,7 +7,7 @@
 //
 
 #import "FLSLiquid.h"
-#import <array>
+#import "FLSLiquidParticleShader.h"
 #import <unordered_set>
 #import <unordered_map>
 
@@ -15,6 +15,7 @@ using namespace std;
 
 #define MAX_PARTICLES 1000
 #define RADIUS 0.6f
+//#define VISCOSITY 0.004f
 #define VISCOSITY 0.000f
 #define IDEAL_RADIUS 50.0f
 
@@ -35,43 +36,51 @@ typedef struct FLSParticle
 FLSParticle;
 
 
-// BEGIN TEMPORARY / DEBUG RENDERING CODE
+//// BEGIN TEMPORARY / DEBUG RENDERING CODE
+//
+//
+//typedef struct {
+//    CGPoint geometryVertex;
+//    CGPoint textureVertex;
+//} TexturedVertex;
+//
+//typedef struct {
+//    TexturedVertex bl;
+//    TexturedVertex br;
+//    TexturedVertex tl;
+//    TexturedVertex tr;
+//} TexturedQuad;
+//
+//@interface FLSLiquid()
+//
+//@property (strong) GLKBaseEffect * effect;
+//@property (assign) TexturedQuad quad;
+//@property (strong) GLKTextureInfo * textureInfo;
+//
+//@end
+//
+//
+//// END TEMPORARY / DEBUG RENDERING CODE
 
-
-typedef struct {
-    CGPoint geometryVertex;
-    CGPoint textureVertex;
-} TexturedVertex;
-
-typedef struct {
-    TexturedVertex bl;
-    TexturedVertex br;
-    TexturedVertex tl;
-    TexturedVertex tr;
-} TexturedQuad;
 
 @interface FLSLiquid()
 
-@property (strong) GLKBaseEffect * effect;
-@property (assign) TexturedQuad quad;
-@property (strong) GLKTextureInfo * textureInfo;
+// Properties
+@property (strong) FLSLiquidParticleShader *liquidParticleShader;
 
 @end
-
-
-// END TEMPORARY / DEBUG RENDERING CODE
 
 
 @implementation FLSLiquid
 
 
-// BEGIN TEMPORARY / DEBUG RENDERING CODE
-
-
-CGSize contentSize;
-
-
-// END TEMPORARY / DEBUG RENDERING CODE
+//// BEGIN TEMPORARY / DEBUG RENDERING CODE
+//
+//
+//CGSize contentSize;
+//
+//
+//// END TEMPORARY / DEBUG RENDERING CODE
 
 
 const float DT = 1.0f / 60.0f;
@@ -85,11 +94,16 @@ const int MAX_NEIGHBORS = 75;
 
 const int PARTICLE_ADD_RATE = 4;
 
+float retinaScale;
+
 GLKVector2 _delta[MAX_PARTICLES];
 GLKVector2 _scaledPositions[MAX_PARTICLES];
 GLKVector2 _scaledVelocities[MAX_PARTICLES];
 
+GLKVector2 _screenSize;
+
 FLSParticle _liquid[MAX_PARTICLES];
+GLKVector2 _particlePositions[MAX_PARTICLES];
 unordered_set<size_t> _activeParticles;
 
 unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>> _grid;
@@ -120,6 +134,7 @@ void createParticle(float posX, float posY) {
             GLKVector2 jitter = GLKVector2Make(((((float)rand())/((float)RAND_MAX))*2)-1, (((float)rand())/((float)RAND_MAX))-0.5);
             
             particle->position = GLKVector2Add(GLKVector2Make(posX, posY), jitter);
+            _particlePositions[particle->index] = particle->position;
             particle->velocity = GLKVector2Make(0, 0);
             particle->alive = true;
             particle->ci = getGridX(particle->position.x);
@@ -213,6 +228,7 @@ void applyLiquidConstraints() {
         FLSParticle *particle = &_liquid[index];
         
         particle->position = GLKVector2Add(particle->position, GLKVector2MultiplyScalar(_delta[index], 1 / MULTIPLIER));
+        _particlePositions[particle->index] = particle->position;
         particle->velocity = GLKVector2Add(particle->velocity, GLKVector2MultiplyScalar(_delta[index], 1 / (MULTIPLIER * DT)));
         
         // Update particle cell
@@ -284,66 +300,77 @@ int getGridY(float y) {
 }
 
 
-// BEGIN TEMPORARY / DEBUG RENDERING CODE
+//// BEGIN TEMPORARY / DEBUG RENDERING CODE
+//
+//
+//GLKMatrix4 modelMatrix(float x, float y) {
+//    
+//    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+//    modelMatrix = GLKMatrix4Translate(modelMatrix, x*scale, y*scale, 0);
+//    modelMatrix = GLKMatrix4Translate(modelMatrix, -contentSize.width/2, -contentSize.height/2, 0);
+//    return modelMatrix;
+//    
+//}
+//
+//
+//// END TEMPORARY / DEBUG RENDERING CODE
 
 
-GLKMatrix4 modelMatrix(float x, float y) {
-    
-    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
-    modelMatrix = GLKMatrix4Translate(modelMatrix, x*scale, y*scale, 0);
-    modelMatrix = GLKMatrix4Translate(modelMatrix, -contentSize.width/2, -contentSize.height/2, 0);
-    return modelMatrix;
-    
-}
-
-
-// END TEMPORARY / DEBUG RENDERING CODE
-
-
--(id)initWithParticleTexture:(NSString *)fileName effect:(GLKBaseEffect *)effect {
+-(id)initWithScreenSize:(GLKVector2)screenSize {
     
     if ((self = [super init])) {
         
         
-        // BEGIN TEMPORARY / DEBUG RENDERING CODE
+//        // BEGIN TEMPORARY / DEBUG RENDERING CODE
+//        
+//        
+//        // 1
+//        self.effect = effect;
+//        
+//        // 2
+//        NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
+//                                  [NSNumber numberWithBool:YES],
+//                                  GLKTextureLoaderOriginBottomLeft,
+//                                  nil];
+//        
+//        // 3
+//        NSError * error;
+//        NSString *path = [[NSBundle mainBundle] pathForResource:fileName ofType:nil];
+//        // 4
+//        self.textureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
+//        if (self.textureInfo == nil) {
+//            NSLog(@"Error loading file: %@", [error localizedDescription]);
+//            return nil;
+//        }
+//        
+//        contentSize = CGSizeMake(self.textureInfo.width, self.textureInfo.height);
+//        
+//        TexturedQuad newQuad;
+//        newQuad.bl.geometryVertex = CGPointMake(0, 0);
+//        newQuad.br.geometryVertex = CGPointMake(self.textureInfo.width, 0);
+//        newQuad.tl.geometryVertex = CGPointMake(0, self.textureInfo.height);
+//        newQuad.tr.geometryVertex = CGPointMake(self.textureInfo.width, self.textureInfo.height);
+//        
+//        newQuad.bl.textureVertex = CGPointMake(0, 0);
+//        newQuad.br.textureVertex = CGPointMake(1, 0);
+//        newQuad.tl.textureVertex = CGPointMake(0, 1);
+//        newQuad.tr.textureVertex = CGPointMake(1, 1);
+//        self.quad = newQuad;
+//        
+//        
+//        // END TEMPORARY / DEBUG RENDERING CODE
         
+        _screenSize = screenSize;
         
-        // 1
-        self.effect = effect;
-        
-        // 2
-        NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  [NSNumber numberWithBool:YES],
-                                  GLKTextureLoaderOriginBottomLeft,
-                                  nil];
-        
-        // 3
-        NSError * error;
-        NSString *path = [[NSBundle mainBundle] pathForResource:fileName ofType:nil];
-        // 4
-        self.textureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
-        if (self.textureInfo == nil) {
-            NSLog(@"Error loading file: %@", [error localizedDescription]);
-            return nil;
+        if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)] &&
+            ([UIScreen mainScreen].scale == 2.0))
+        {
+            retinaScale = 2.0f;
+        } else {
+            retinaScale = 1.0f;
         }
         
-        contentSize = CGSizeMake(self.textureInfo.width, self.textureInfo.height);
-        
-        TexturedQuad newQuad;
-        newQuad.bl.geometryVertex = CGPointMake(0, 0);
-        newQuad.br.geometryVertex = CGPointMake(self.textureInfo.width, 0);
-        newQuad.tl.geometryVertex = CGPointMake(0, self.textureInfo.height);
-        newQuad.tr.geometryVertex = CGPointMake(self.textureInfo.width, self.textureInfo.height);
-        
-        newQuad.bl.textureVertex = CGPointMake(0, 0);
-        newQuad.br.textureVertex = CGPointMake(1, 0);
-        newQuad.tl.textureVertex = CGPointMake(0, 1);
-        newQuad.tr.textureVertex = CGPointMake(1, 1);
-        self.quad = newQuad;
-        
-        
-        // END TEMPORARY / DEBUG RENDERING CODE
-        
+        [self loadShader];
         
         _activeParticles = unordered_set<size_t>();
         
@@ -367,7 +394,12 @@ GLKMatrix4 modelMatrix(float x, float y) {
             };
             _liquid[i] = particle;
             
+            // Fill _particlePositions Array
+            _particlePositions[i] = particle.position;
+            
         }
+        
+        [self setupVBO];
         
     }
     return self;
@@ -380,34 +412,89 @@ GLKMatrix4 modelMatrix(float x, float y) {
 }
 -(void)render {
     
-    for (size_t i : _activeParticles) {
-        
-        // 1
-        self.effect.texture2d0.name = self.textureInfo.name;
-        self.effect.texture2d0.enabled = YES;
-        
-        // 2
-        self.effect.transform.modelviewMatrix = modelMatrix(_liquid[i].position.x, _liquid[i].position.y);
-        [self.effect prepareToDraw];
-        
-        // 3
-        glEnableVertexAttribArray(GLKVertexAttribPosition);
-        glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
-        
-        // 4
-        long offset = (long)&_quad;
-        glVertexAttribPointer(GLKVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *) (offset + offsetof(TexturedVertex, geometryVertex)));
-        glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *) (offset + offsetof(TexturedVertex, textureVertex)));
-        
-        // 5
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        
-    }
+//    for (size_t i : _activeParticles) {
+//        
+//        // 1
+//        self.effect.texture2d0.name = self.textureInfo.name;
+//        self.effect.texture2d0.enabled = YES;
+//        
+//        // 2
+//        self.effect.transform.modelviewMatrix = modelMatrix(_liquid[i].position.x, _liquid[i].position.y);
+//        [self.effect prepareToDraw];
+//        
+//        // 3
+//        glEnableVertexAttribArray(GLKVertexAttribPosition);
+//        glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
+//        
+//        // 4
+//        long offset = (long)&_quad;
+//        glVertexAttribPointer(GLKVertexAttribPosition, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *) (offset + offsetof(TexturedVertex, geometryVertex)));
+//        glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void *) (offset + offsetof(TexturedVertex, textureVertex)));
+//        
+//        // 5
+//        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+//        
+//    }
+    
+    // 1
+    // Create Projection Matrix
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakeScale(2*scale/_screenSize.x, 2*scale/_screenSize.y, 1.0f);
+    
+    // 2
+    // Uniforms
+    glUniformMatrix4fv(self.liquidParticleShader.uProjectionMatrix, 1, 0, projectionMatrix.m);
+    glUniform1f(self.liquidParticleShader.uRetinaScale, retinaScale);
+    
+    
+    
+    glBufferData(                                       // Fill bound buffer with particles
+                 GL_ARRAY_BUFFER,                       // Buffer target
+                 sizeof(_particlePositions),                       // Buffer data size
+                 _particlePositions,                               // Buffer data pointer
+                 GL_DYNAMIC_DRAW);                      // Usage - Data never changes; used for drawing
+    
+    
+    
+    // 3
+    // Attributes
+    glEnableVertexAttribArray(self.liquidParticleShader.aPosition);
+    glVertexAttribPointer(self.liquidParticleShader.aPosition,                // Set pointer
+                          2,                                        // One component per particle
+                          GL_FLOAT,                                 // Data is floating point type
+                          GL_FALSE,                                 // No fixed point scaling
+                          sizeof(GLKVector2),                         // No gaps in data
+                          0);      // Start from "position" offset within bound buffer
+    
+    // 4
+    // Draw particles
+    glDrawArrays(GL_POINTS, 0, _activeParticles.size());
+    glDisableVertexAttribArray(self.liquidParticleShader.aPosition);
+    
+}
+#pragma mark - Load Shader
+
+-(void)loadShader
+{
+    self.liquidParticleShader = [[FLSLiquidParticleShader alloc] init];
+    [self.liquidParticleShader loadShader];
+    glUseProgram(self.liquidParticleShader.program);
+}
+-(void)setupVBO {
+    
+    // Create Vertex Buffer Object (VBO)
+    GLuint particleBuffer = 0;
+    glGenBuffers(1, &particleBuffer);                   // Generate particle buffer
+    glBindBuffer(GL_ARRAY_BUFFER, particleBuffer);      // Bind particle buffer
+    glBufferData(                                       // Fill bound buffer with particles
+                 GL_ARRAY_BUFFER,                       // Buffer target
+                 sizeof(_particlePositions),                       // Buffer data size
+                 _particlePositions,                               // Buffer data pointer
+                 GL_DYNAMIC_DRAW);                      // Usage - Data never changes; used for drawing
     
 }
 -(void)createParticleWithPosX:(float)posX posY:(float)posY {
     
-    createParticle(posX, posY);
+    createParticle((posX - _screenSize.x/2)/scale, (_screenSize.y/2 - posY)/scale);
     
 }
 

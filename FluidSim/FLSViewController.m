@@ -9,52 +9,32 @@
 #import "FLSViewController.h"
 #import "FLSLiquid.h"
 
-@interface FLSViewController ()
-
-@property (strong, nonatomic) EAGLContext *context;
-@property (strong) GLKBaseEffect *effect;
-
-@property FLSLiquid *liquid;
-
-@end
-
 @implementation FLSViewController
-
-@synthesize context = _context;
-@synthesize liquid = _liquid;
 
 BOOL touching = false;
 GLKVector2 touchPos;
 GLKVector2 screenSize;
 
+FLSLiquid *liquid;
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
-    srand((unsigned int)time(0));
+    // Set up context
+    EAGLContext* context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    [EAGLContext setCurrentContext:context];
     
-    self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-    
-    if (!self.context) {
-        NSLog(@"Failed to create ES context");
-    }
-    
-    GLKView *view = (GLKView *)self.view;
-    view.context = self.context;
-    [EAGLContext setCurrentContext:self.context];
-    
-    self.effect = [[GLKBaseEffect alloc] init];
+    // Set up view
+    GLKView* view = (GLKView*)self.view;
+    view.context = context;
     
     CGRect screenRect = [[UIScreen mainScreen] bounds];
     
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, screenRect.size.width, 0, screenRect.size.height, -1024, 1024);
-    
     screenSize = GLKVector2Make(screenRect.size.width, screenRect.size.height);
     
-    self.effect.transform.projectionMatrix = projectionMatrix;
-    
-    self.liquid = [[FLSLiquid alloc] initWithParticleTexture:@"Particle.png" effect:self.effect];
-    
+    liquid = [[FLSLiquid alloc] initWithScreenSize:screenSize];
+
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -64,20 +44,14 @@ GLKVector2 screenSize;
 
 #pragma mark - GLKViewDelegate
 
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
-    
-    glClearColor(1, 1, 1, 1);
+- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+{
+    // Set the background color (green)
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
     
-    [self.liquid render];
+    [liquid render];
     
-//    for (size_t i : _activeParticles) {
-//        
-//        [_liquid[i] render];
-//        
-//    }
 }
 
 
@@ -92,10 +66,10 @@ GLKVector2 screenSize;
     //if (mouseState.LeftButton == ButtonState.Pressed)
     
     if (touching)
-        [self.liquid createParticleWithPosX:touchPos.x/scale posY:(screenSize.y-touchPos.y)/scale];
+        [liquid createParticleWithPosX:touchPos.x posY:touchPos.y];
 //    
 //    applyLiquidConstraints();
-    [self.liquid update];
+    [liquid update];
     
 }
 
