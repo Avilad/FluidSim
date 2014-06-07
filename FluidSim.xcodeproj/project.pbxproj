@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		628BAA1C18A77DF0005AC31D /* FLSLiquidPostShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 628BAA1B18A77DF0005AC31D /* FLSLiquidPostShader.m */; };
 		62AE6CFF18A1559B00B73320 /* FLSLiquidParticleShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 62AE6CFE18A1559B00B73320 /* FLSLiquidParticleShader.m */; };
 		62AE6D0218A15A9000B73320 /* FLSShaderProcessor.mm in Sources */ = {isa = PBXBuildFile; fileRef = 62AE6D0118A15A9000B73320 /* FLSShaderProcessor.mm */; };
 		62B4E2BD189BC9AA009D8BE5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2BC189BC9AA009D8BE5 /* Foundation.framework */; };
@@ -26,7 +27,11 @@
 		62B4E2E9189BC9AA009D8BE5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62B4E2C0189BC9AA009D8BE5 /* UIKit.framework */; };
 		62B4E2F1189BC9AA009D8BE5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2EF189BC9AA009D8BE5 /* InfoPlist.strings */; };
 		62B4E2F3189BC9AA009D8BE5 /* FluidSimTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 62B4E2F2189BC9AA009D8BE5 /* FluidSimTests.m */; };
-		62B4E300189BCA1A009D8BE5 /* Particle.png in Resources */ = {isa = PBXBuildFile; fileRef = 62B4E2FF189BCA1A009D8BE5 /* Particle.png */; };
+		62BA924218A6A39700CCDA79 /* Particle32.png in Resources */ = {isa = PBXBuildFile; fileRef = 62BA923F18A6A39700CCDA79 /* Particle32.png */; };
+		62BA924318A6A39700CCDA79 /* Particle32@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 62BA924018A6A39700CCDA79 /* Particle32@2x.png */; };
+		62BA924418A6A39700CCDA79 /* Particle64@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 62BA924118A6A39700CCDA79 /* Particle64@2x.png */; };
+		62BA924618A6A3B100CCDA79 /* Particle64.png in Resources */ = {isa = PBXBuildFile; fileRef = 62BA924518A6A3B100CCDA79 /* Particle64.png */; };
+		62BA924818A6A6EA00CCDA79 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62BA924718A6A6EA00CCDA79 /* CoreMotion.framework */; };
 		62F42A4A18A0EBFD0037AA88 /* FLSLiquid.mm in Sources */ = {isa = PBXBuildFile; fileRef = 62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +46,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		628BAA1618A77D9A005AC31D /* LiquidPost.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LiquidPost.vsh; sourceTree = "<group>"; };
+		628BAA1818A77DAA005AC31D /* LiquidPost.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LiquidPost.fsh; sourceTree = "<group>"; };
+		628BAA1A18A77DF0005AC31D /* FLSLiquidPostShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSLiquidPostShader.h; sourceTree = "<group>"; };
+		628BAA1B18A77DF0005AC31D /* FLSLiquidPostShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLSLiquidPostShader.m; sourceTree = "<group>"; };
 		62AE6CFB18A14AA700B73320 /* LiquidParticle.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; path = LiquidParticle.vsh; sourceTree = "<group>"; };
 		62AE6CFC18A14AB700B73320 /* LiquidParticle.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; path = LiquidParticle.fsh; sourceTree = "<group>"; };
 		62AE6CFD18A1559B00B73320 /* FLSLiquidParticleShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSLiquidParticleShader.h; sourceTree = "<group>"; };
@@ -69,7 +78,11 @@
 		62B4E2EE189BC9AA009D8BE5 /* FluidSimTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FluidSimTests-Info.plist"; sourceTree = "<group>"; };
 		62B4E2F0189BC9AA009D8BE5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		62B4E2F2189BC9AA009D8BE5 /* FluidSimTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FluidSimTests.m; sourceTree = "<group>"; };
-		62B4E2FF189BCA1A009D8BE5 /* Particle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Particle.png; sourceTree = "<group>"; };
+		62BA923F18A6A39700CCDA79 /* Particle32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Particle32.png; sourceTree = "<group>"; };
+		62BA924018A6A39700CCDA79 /* Particle32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Particle32@2x.png"; sourceTree = "<group>"; };
+		62BA924118A6A39700CCDA79 /* Particle64@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Particle64@2x.png"; sourceTree = "<group>"; };
+		62BA924518A6A3B100CCDA79 /* Particle64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Particle64.png; sourceTree = "<group>"; };
+		62BA924718A6A6EA00CCDA79 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		62F42A4818A0EBFD0037AA88 /* FLSLiquid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLSLiquid.h; sourceTree = "<group>"; };
 		62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FLSLiquid.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -79,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				62BA924818A6A6EA00CCDA79 /* CoreMotion.framework in Frameworks */,
 				62B4E2C5189BC9AA009D8BE5 /* OpenGLES.framework in Frameworks */,
 				62B4E2BF189BC9AA009D8BE5 /* CoreGraphics.framework in Frameworks */,
 				62B4E2C1189BC9AA009D8BE5 /* UIKit.framework in Frameworks */,
@@ -100,6 +114,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		628BAA1918A77DC1005AC31D /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				62AE6CFD18A1559B00B73320 /* FLSLiquidParticleShader.h */,
+				62AE6CFE18A1559B00B73320 /* FLSLiquidParticleShader.m */,
+				62AE6CFB18A14AA700B73320 /* LiquidParticle.vsh */,
+				62AE6CFC18A14AB700B73320 /* LiquidParticle.fsh */,
+				628BAA1A18A77DF0005AC31D /* FLSLiquidPostShader.h */,
+				628BAA1B18A77DF0005AC31D /* FLSLiquidPostShader.m */,
+				628BAA1618A77D9A005AC31D /* LiquidPost.vsh */,
+				628BAA1818A77DAA005AC31D /* LiquidPost.fsh */,
+				62AE6D0018A15A9000B73320 /* FLSShaderProcessor.h */,
+				62AE6D0118A15A9000B73320 /* FLSShaderProcessor.mm */,
+			);
+			name = Shaders;
+			sourceTree = "<group>";
+		};
 		62B4E2B0189BC9AA009D8BE5 = {
 			isa = PBXGroup;
 			children = (
@@ -122,6 +153,7 @@
 		62B4E2BB189BC9AA009D8BE5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				62BA924718A6A6EA00CCDA79 /* CoreMotion.framework */,
 				62B4E2BC189BC9AA009D8BE5 /* Foundation.framework */,
 				62B4E2BE189BC9AA009D8BE5 /* CoreGraphics.framework */,
 				62B4E2C0189BC9AA009D8BE5 /* UIKit.framework */,
@@ -139,18 +171,13 @@
 				62B4E2D0189BC9AA009D8BE5 /* FLSAppDelegate.m */,
 				62F42A4818A0EBFD0037AA88 /* FLSLiquid.h */,
 				62F42A4918A0EBFD0037AA88 /* FLSLiquid.mm */,
-				62AE6CFD18A1559B00B73320 /* FLSLiquidParticleShader.h */,
-				62AE6CFE18A1559B00B73320 /* FLSLiquidParticleShader.m */,
-				62AE6D0018A15A9000B73320 /* FLSShaderProcessor.h */,
-				62AE6D0118A15A9000B73320 /* FLSShaderProcessor.mm */,
-				62AE6CFB18A14AA700B73320 /* LiquidParticle.vsh */,
-				62AE6CFC18A14AB700B73320 /* LiquidParticle.fsh */,
+				628BAA1918A77DC1005AC31D /* Shaders */,
 				62B4E2D2189BC9AA009D8BE5 /* Main_iPhone.storyboard */,
 				62B4E2D5189BC9AA009D8BE5 /* Main_iPad.storyboard */,
 				62B4E2DC189BC9AA009D8BE5 /* FLSViewController.h */,
 				62B4E2DD189BC9AA009D8BE5 /* FLSViewController.m */,
 				62B4E2DF189BC9AA009D8BE5 /* Images.xcassets */,
-				62B4E2FF189BCA1A009D8BE5 /* Particle.png */,
+				62BA923618A6A23800CCDA79 /* Images */,
 				62B4E2C7189BC9AA009D8BE5 /* Supporting Files */,
 			);
 			path = FluidSim;
@@ -185,6 +212,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		62BA923618A6A23800CCDA79 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				62BA923F18A6A39700CCDA79 /* Particle32.png */,
+				62BA924018A6A39700CCDA79 /* Particle32@2x.png */,
+				62BA924518A6A3B100CCDA79 /* Particle64.png */,
+				62BA924118A6A39700CCDA79 /* Particle64@2x.png */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -195,7 +233,7 @@
 				62B4E2B5189BC9AA009D8BE5 /* Sources */,
 				62B4E2B6189BC9AA009D8BE5 /* Frameworks */,
 				62B4E2B7189BC9AA009D8BE5 /* Resources */,
-				62B27AC1189D6D030001D434 /* ShellScript */,
+				50524F424C454D533F /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -231,7 +269,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = FLS;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = SlEePlEs5;
 				TargetAttributes = {
 					62B4E2E4189BC9AA009D8BE5 = {
@@ -264,10 +302,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				62B4E2D7189BC9AA009D8BE5 /* Main_iPad.storyboard in Resources */,
+				62BA924418A6A39700CCDA79 /* Particle64@2x.png in Resources */,
+				62BA924318A6A39700CCDA79 /* Particle32@2x.png in Resources */,
+				62BA924218A6A39700CCDA79 /* Particle32.png in Resources */,
 				62B4E2D4189BC9AA009D8BE5 /* Main_iPhone.storyboard in Resources */,
-				62B4E300189BCA1A009D8BE5 /* Particle.png in Resources */,
 				62B4E2E0189BC9AA009D8BE5 /* Images.xcassets in Resources */,
 				62B4E2CB189BC9AA009D8BE5 /* InfoPlist.strings in Resources */,
+				62BA924618A6A3B100CCDA79 /* Particle64.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,7 +323,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		62B27AC1189D6D030001D434 /* ShellScript */ = {
+		50524F424C454D533F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -293,7 +334,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export CODESIGN_ALLOCATE=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/codesign_allocate\nif [ \"${PLATFORM_NAME}\" == \"iphoneos\" ]; then\n/Developer/iphoneentitlements401/gen_entitlements.py \"my.company.${PROJECT_NAME}\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent\";\ncodesign -f -s \"iPhone Developer\" --entitlements \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/\"\nfi";
+			shellScript = "export CODESIGN_ALLOCATE=/Library/JailCoder/codesign_allocate\nif [ \"${PLATFORM_NAME}\" == \"iphoneos\" ]; then\n/Library/JailCoder/Entitlements/Entitlements.py \"my.company.${PROJECT_NAME}\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent\";\ncodesign -f -s \"iPhone Developer\" --entitlements \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/\"\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -304,6 +345,7 @@
 			files = (
 				62B4E2D1189BC9AA009D8BE5 /* FLSAppDelegate.m in Sources */,
 				62F42A4A18A0EBFD0037AA88 /* FLSLiquid.mm in Sources */,
+				628BAA1C18A77DF0005AC31D /* FLSLiquidPostShader.m in Sources */,
 				62AE6CFF18A1559B00B73320 /* FLSLiquidParticleShader.m in Sources */,
 				62B4E2CD189BC9AA009D8BE5 /* main.m in Sources */,
 				62B4E2DE189BC9AA009D8BE5 /* FLSViewController.m in Sources */,
@@ -369,7 +411,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -382,7 +423,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -409,7 +450,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -422,7 +462,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -451,6 +491,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -461,11 +502,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FluidSim/FluidSim-Prefix.pch";
 				INFOPLIST_FILE = "FluidSim/FluidSim-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -473,7 +516,6 @@
 		62B4E2FA189BC9AA009D8BE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/FluidSim.app/FluidSim";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -496,7 +538,6 @@
 		62B4E2FB189BC9AA009D8BE5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/FluidSim.app/FluidSim";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",

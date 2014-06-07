@@ -20,4 +20,6 @@ const float scale = 64.0f;
 -(void)render;
 -(void)createParticleWithPosX:(float)posX posY:(float)posY;
 
+-(void)dealloc;
+
 @end

@@ -16,10 +16,12 @@
 
 // Attribute Handles
 @property (readwrite) GLint aPosition;
+@property (readwrite) GLint aVelocity;
 
 // Uniform Handles
 @property (readwrite) GLint uProjectionMatrix;
 @property (readwrite) GLint uRetinaScale;
+@property (readwrite) GLint uTexture;
 
 // Methods
 - (void)loadShader;

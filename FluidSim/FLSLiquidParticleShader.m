@@ -25,10 +25,12 @@
     
     // Attributes
     self.aPosition = glGetAttribLocation(self.program, "aPosition");
+    self.aVelocity = glGetAttribLocation(self.program, "aVelocity");
     
     // Uniforms
     self.uProjectionMatrix = glGetUniformLocation(self.program, "uProjectionMatrix");
     self.uRetinaScale = glGetUniformLocation(self.program, "uRetinaScale");
+    self.uTexture = glGetUniformLocation(self.program, "uTexture");
 }
 
 @end
