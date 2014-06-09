@@ -12,7 +12,8 @@
 #import "FLSLiquidPostShader.h"
 #import <CoreMotion/CoreMotion.h>
 #import <unordered_set>
-#import <unordered_map>
+//#import <unordered_map>
+#import <vector>
 #import <cmath>
 
 using namespace std;
@@ -76,6 +77,9 @@ const int PARTICLE_ADD_RATE = 4;
 const float PARTICLE_BOUNCINESS = 0.2f;
 const float PARTICLE_BOUNCE_DAMPENING = 0.85f;
 
+GLKVector2 lowestGridCell = GLKVector2Make(0, 0);
+GLKVector2 gridSize;
+
 float retinaScale;
 
 GLuint postFramebuffer;
@@ -104,7 +108,7 @@ FLSParticle _liquid[MAX_PARTICLES];
 FLSGLParticle _glParticles[MAX_PARTICLES];
 unordered_set<size_t> _activeParticles;
 
-unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>> _grid;
+vector<vector<unordered_set<size_t>>> _grid;
 
 void createParticle(float posX, float posY) {
     
@@ -142,14 +146,7 @@ void createParticle(float posX, float posY) {
             particle->ci = getGridX(particle->position.x);
             particle->cj = getGridY(particle->position.y);
             
-            // Create grid cell if necessary
-            if (_grid.find(particle->ci) == _grid.end()) {
-                _grid.insert(make_pair(particle->ci,unordered_map<size_t, unordered_set<size_t>>()));
-            }
-            if (_grid.at(particle->ci).find(particle->cj) == _grid.at(particle->ci).end()) {
-                _grid.at(particle->ci).insert(make_pair(particle->cj,unordered_set<size_t>()));
-            }
-            _grid.at(particle->ci).at(particle->cj).insert(particle->index);
+            _grid[particle->ci][particle->cj].insert(particle->index);
             
             _activeParticles.insert(particle->index);
             
@@ -254,35 +251,8 @@ void applyLiquidConstraints() {
         particle->position = GLKVector2Add(particle->position, _delta[index]);
         particle->position = GLKVector2Add(particle->position, particle->velocity);
         
-        // Update particle cell
-        int x = getGridX(particle->position.x);
-        int y = getGridY(particle->position.y);
-        
-        if (particle->ci == x && particle->cj == y)
-            continue;
-        else {
-            
-            _grid.at(particle->ci).at(particle->cj).erase(index);
-            
-            if (_grid.at(particle->ci).at(particle->cj).empty()) {
-                
-                _grid.at(particle->ci).erase(particle->cj);
-                
-                if (_grid.at(particle->ci).empty()) {
-                    _grid.erase(particle->ci);
-                }
-            }
-            
-            if (_grid.find(x) == _grid.end())
-                _grid.insert(make_pair(x, unordered_map<size_t, unordered_set<size_t>>()));
-            if (_grid.at(x).find(y) == _grid.at(x).end())
-                _grid.at(x).insert(make_pair(y, unordered_set<size_t>()));
-            _grid.at(x).at(y).insert(index);
-            particle->ci = x;
-            particle->cj = y;
-        }
-        
     }
+    
     // Collisions
     for (size_t index : _activeParticles) {
         
@@ -308,10 +278,31 @@ void applyLiquidConstraints() {
             particle->velocity.y *= -PARTICLE_BOUNCINESS;
             particle->velocity = GLKVector2MultiplyScalar(particle->velocity, PARTICLE_BOUNCE_DAMPENING);
         }
-        
+
         // For GL purposes
         _glParticles[particle->index].position = particle->position;
         _glParticles[particle->index].velocity = GLKVector2Make(fabsf(particle->velocity.v[0]), fabsf(particle->velocity.v[1]));
+        
+    }
+    
+    // Update particle cells
+    for (size_t index : _activeParticles) {
+        
+        FLSParticle *particle = &_liquid[index];
+        
+        int x = getGridX(particle->position.x);
+        int y = getGridY(particle->position.y);
+        
+        if (particle->ci == x && particle->cj == y)
+            continue;
+        else {
+            
+            _grid[particle->ci][particle->cj].erase(index);
+            
+            _grid[x][y].insert(index);
+            particle->ci = x;
+            particle->cj = y;
+        }
         
     }
 }
@@ -320,38 +311,37 @@ void findNeighbors(FLSParticle &particle) {
     
     for (int nx = -1; nx < 2; nx++) {
         
+        int x = particle.ci + nx;
+        if (x < 0 || x > gridSize.x - 1)
+            continue;
+        
         for (int ny = -1; ny < 2; ny++) {
             
-            int x = particle.ci + nx;
             int y = particle.cj + ny;
-            //if (grid.TryGetValue(x, out gridX) && gridX.TryGetValue(y, out gridY)) {
-            if (_grid.find(x) != _grid.end()) {
+            if (y < 0 || y > gridSize.y - 1)
+                continue;
+            
+            unordered_set<size_t> &gridSquare = _grid[x][y];
+            
+            for (size_t neighbourIndex : gridSquare) {
                 
-                unordered_map<size_t, unordered_set<size_t>> &gridX = _grid.at(x);
-                if (gridX.find(y) != gridX.end()) {
-                    unordered_set<size_t> &gridY = gridX.at(y);
+                if (neighbourIndex != particle.index) {
                     
-                    for (size_t neighbourIndex : gridY) {
-                        
-                        if (neighbourIndex != particle.index) {
-                            
-                            particle.neighbors[particle.neighborCount] = (int)neighbourIndex;
-                            particle.neighborCount++;
-                            
-                            if (particle.neighborCount >= MAX_NEIGHBORS)
-                                return;
-                        }
-                    }
+                    particle.neighbors[particle.neighborCount] = (int)neighbourIndex;
+                    particle.neighborCount++;
+                    
+                    if (particle.neighborCount >= MAX_NEIGHBORS)
+                        return;
                 }
             }
         }
     }
 }
 int getGridX(float x) {
-    return (int)floorf(x / CELL_SIZE);
+    return (int)floorf(x / CELL_SIZE) + (int)lowestGridCell.x;
 }
 int getGridY(float y) {
-    return (int)floorf(y / CELL_SIZE);
+    return (int)floorf(y / CELL_SIZE) + (int)lowestGridCell.y;
 }
 
 -(id)initWithScreenSize:(GLKVector2)screenSize {
@@ -391,8 +381,12 @@ int getGridY(float y) {
         [self setupRTT];
         
         _activeParticles = unordered_set<size_t>();
+        GLKVector2 tmpHighestGridCell = GLKVector2Make(getGridX(_worldBounds.x), getGridY(_worldBounds.y));
+        lowestGridCell = GLKVector2Make(-getGridX(-_worldBounds.x), -getGridY(-_worldBounds.y));
+        gridSize = GLKVector2Make(tmpHighestGridCell.x + lowestGridCell.x + 1, tmpHighestGridCell.y + lowestGridCell.y + 1);
         
-        _grid = unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>>();
+        _grid = vector<vector<unordered_set<size_t>>>(gridSize.x, vector<unordered_set<size_t>>(gridSize.y, unordered_set<size_t>()));
+//        _grid = unordered_map<size_t, unordered_map<size_t, unordered_set<size_t>>>();
         
         for (int i = 0; i < MAX_PARTICLES; i++)
         {

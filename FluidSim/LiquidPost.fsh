@@ -16,11 +16,14 @@ static const char* LiquidPostFS = STRINGIFY
     
     highp vec4 texture = texture2D(fbo_texture, f_texcoord);
     
-    highp float speed = sqrt(texture.y * texture.y + texture.z * texture.z);
+    highp float speed = sqrt(texture.y * texture.y + texture.z * texture.z) / 2.0;
     
     highp float scattering = 0.0;
     
     // Scattering. Contrived as fuck, but it works so who cares.
+    // EDIT: NVM, too contrived, will probably run slow on older devices.
+    // Will move the relevant parts of this calculation onto the CPU-side render method.
+    // This will serve to clean up the code but ultimately what's expensive is the texture2D call.
     
     scattering += texture2D(fbo_texture, vec2(f_texcoord.x + ((2.0 * uGravity.y - 16.0 * uGravity.x) * pxSize.x), f_texcoord.y + ((2.0 * uGravity.x - 16.0 * uGravity.y) * pxSize.y))).x / 20.0;
     scattering += texture2D(fbo_texture, vec2(f_texcoord.x + ((-4.0 * uGravity.y - 32.0 * uGravity.x) * pxSize.x), f_texcoord.y + ((-4.0 * uGravity.x - 32.0 * uGravity.y) * pxSize.y))).x / 20.0;
@@ -56,7 +59,8 @@ static const char* LiquidPostFS = STRINGIFY
     top -= texture2D(fbo_texture, vec2(f_texcoord.x - (10.0 * scaledGravity.x * pxSize.x), f_texcoord.y - (10.0 * scaledGravity.y * pxSize.y))).x;
     top = step(0.7, top) * top;
     
-    highp vec4 color = vec4((0.15 + speed + top) * scattering, (0.25 + speed + top) * scattering, (0.7 + speed + top) * scattering, step(0.7,texture.x));
+//    highp vec4 color = vec4((0.15 + speed + top) * scattering, (0.25 + speed + top) * scattering, (0.7 + speed + top) * scattering, step(0.7,texture.x));
+    highp vec4 color = vec4((0.10 + speed + top) * scattering, (0.20 + speed + top) * scattering, (0.55 + speed + top) * scattering, step(0.7,texture.x));
     gl_FragColor = color;
 //    gl_FragColor = vec4(f_texcoord*10.0, 0.0, 0.0);
 //    gl_FragColor = texture;
