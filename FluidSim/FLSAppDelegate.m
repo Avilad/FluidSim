@@ -7,6 +7,7 @@
 //
 
 #import "FLSAppDelegate.h"
+#import "FLSGlobalSettings.h"
 
 @implementation FLSAppDelegate
 
@@ -14,6 +15,18 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    // TODO: Load from NSUserDefaults
+    
+    // LOOK
+    look_baseColor = GLKVector3Make(0.07f, 0.15f, 0.45f); // RANGE: (0.0f, 0.0f, 0.0f) - (1.0f, 1.0f, 1.0f)
+    look_clarity = 0.3f; // RANGE: 0.0f - 1.0f
+    look_shimmer = 12.0f; // RANGE: 0.0f, 10.0f - 15.0f
+    look_foam = 0.5f; // RANGE: 0.0f - 1.0f
+    
+    // FEEL
+    feel_viscosity = 0.0f; // RANGE: 0.0f - 1.0f
+    feel_gravity = 0.5f; // RANGE: 0.0f - 1.0f
+    
     return YES;
 }
 

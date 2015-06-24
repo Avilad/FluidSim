@@ -30,6 +30,12 @@
     self.fbo_texture = glGetUniformLocation(self.program, "fbo_texture");
     self.uScreenSize = glGetUniformLocation(self.program, "uScreenSize");
     self.uGravity = glGetUniformLocation(self.program, "uGravity");
+    self.uShimmer = glGetUniformLocation(self.program, "uShimmer");
+    
+    self.uLook_BaseColor = glGetUniformLocation(self.program, "uLook_BaseColor");
+    self.uLook_Clarity = glGetUniformLocation(self.program, "uLook_Clarity");
+    self.uLook_Shimmer = glGetUniformLocation(self.program, "uLook_Shimmer");
+    self.uLook_Foam = glGetUniformLocation(self.program, "uLook_Foam");
     
 }
 

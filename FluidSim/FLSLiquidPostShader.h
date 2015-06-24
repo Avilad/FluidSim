@@ -21,6 +21,12 @@
 @property (readwrite) GLint fbo_texture;
 @property (readwrite) GLint uScreenSize;
 @property (readwrite) GLint uGravity;
+@property (readwrite) GLint uShimmer;
+
+@property (readwrite) GLint uLook_BaseColor;
+@property (readwrite) GLint uLook_Clarity;
+@property (readwrite) GLint uLook_Shimmer;
+@property (readwrite) GLint uLook_Foam;
 
 // Methods
 - (void)loadShader;

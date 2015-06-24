@@ -12,19 +12,32 @@
 #import "FLSLiquidPostShader.h"
 #import <CoreMotion/CoreMotion.h>
 #import <unordered_set>
-//#import <unordered_map>
 #import <vector>
 #import <cmath>
 
+#import "FLSGlobalSettings.h"
+
 using namespace std;
 
-#define MAX_PARTICLES 500
+//#define FLS_DEBUG
+
+#define MAX_PARTICLES 750
 #define RADIUS 0.8f
-#define VISCOSITY 0.004f
-//#define VISCOSITY 0.000f
 #define IDEAL_RADIUS 50.0f
+#define MULTIPLIER (IDEAL_RADIUS / RADIUS)
+#define IDEAL_RADIUS_SQ (IDEAL_RADIUS * IDEAL_RADIUS)
+#define CELL_SIZE 0.8f
 #define MAX_PRESSURE 0.8f
 #define MAX_PRESSURE_NEAR 1.6f
+#define PARTICLE_BOUNCINESS 0.2f
+#define PARTICLE_BOUNCE_DAMPENING 0.95f
+
+#define PARTICLE_ADD_REMOVE_RATE 4
+
+#define GRAVITY_POLL_FREQUENCY (1.0f / 30.0f)
+#define DT (1.0f / 120.0f)
+// Probably shouldn't go higher than 1/45, or things blow up rather spectacularly.
+// Anything lower is fine though.
 
 typedef struct FLSParticle
 {
@@ -62,22 +75,7 @@ FLSGLParticle;
 
 @implementation FLSLiquid
 
-
-const float DT = 1.0f / 60.0f;
-
-const float MULTIPLIER = IDEAL_RADIUS / RADIUS;
-const float IDEAL_RADIUS_SQ = IDEAL_RADIUS * IDEAL_RADIUS;
-
-const float CELL_SIZE = 0.8f;
-
-const int MAX_NEIGHBORS = 750;
-
-const int PARTICLE_ADD_RATE = 4;
-
-const float PARTICLE_BOUNCINESS = 0.2f;
-const float PARTICLE_BOUNCE_DAMPENING = 0.85f;
-
-GLKVector2 lowestGridCell = GLKVector2Make(0, 0);
+GLKVector2 lowestGridCell;
 GLKVector2 gridSize;
 
 float retinaScale;
@@ -89,7 +87,6 @@ GLuint particleBuffer;
 GLuint postTextureVBO;
 GLint defaultFBO;
 
-const GLKVector4 _color = GLKVector4Make(1.0f, 1.0f, 1.0f, 1.0f);
 GLKTextureInfo* particleTexture;
 GLKTextureInfo* postEffectTexture;
 
@@ -100,19 +97,22 @@ GLKVector2 _scaledVelocities[MAX_PARTICLES];
 GLKVector2 _screenSize;
 GLKVector2 _worldBounds;
 
-//GLKVector2 _gravity = GLKVector2DivideScalar(GLKVector2Make(0, -9.8f), 3000);
-GLKVector2 _gravity = GLKVector2Make(0, 0);
+GLKVector2 _gravity;
+GLKVector2 _glGravity;
 CMMotionManager *motionManager;
 
 FLSParticle _liquid[MAX_PARTICLES];
 FLSGLParticle _glParticles[MAX_PARTICLES];
 unordered_set<size_t> _activeParticles;
+GLushort _activeParticlesGL[MAX_PARTICLES];
 
 vector<vector<unordered_set<size_t>>> _grid;
 
-void createParticle(float posX, float posY) {
+//float allTimeTopVel = 0.0f;
+
+void createParticles(float posX, float posY) {
     
-    FLSParticle *someInactiveParticles[PARTICLE_ADD_RATE];
+    FLSParticle *someInactiveParticles[PARTICLE_ADD_REMOVE_RATE];
     
     int count = 0;
     
@@ -121,7 +121,7 @@ void createParticle(float posX, float posY) {
             someInactiveParticles[count] = &_liquid[i];
             count++;
         }
-        if (count == PARTICLE_ADD_RATE) {
+        if (count == PARTICLE_ADD_REMOVE_RATE) {
             break;
         }
     }
@@ -141,7 +141,7 @@ void createParticle(float posX, float posY) {
             particle->velocity = GLKVector2Make(0, 0);
             particle->alive = true;
             
-            particle->collisionFuzz = ((float)rand())/((float)RAND_MAX) / 10.0f;
+            particle->collisionFuzz = ((float)rand())/((float)RAND_MAX) / 5.0f;
             
             particle->ci = getGridX(particle->position.x);
             particle->cj = getGridY(particle->position.y);
@@ -154,6 +154,142 @@ void createParticle(float posX, float posY) {
         else {
             break;
         }
+    }
+    int i = 0;
+    for (size_t index : _activeParticles) {
+        _activeParticlesGL[i] = (GLushort)index;
+        i++;
+    }
+}
+void removeParticles(float posX, float posY) {
+    
+    GLKVector2 removalPosition = GLKVector2Make(posX, posY);
+    
+    int ci = getGridX(posX);
+    int cj = getGridY(posY);
+    
+    vector<size_t> candidatesForRemoval = vector<size_t>();
+    
+    for (int nx = -1; nx < 2; nx++) {
+        
+        int x = ci + nx;
+        if (x < 0 || x > gridSize.x - 1)
+            continue;
+        
+        for (int ny = -1; ny < 2; ny++) {
+            
+            int y = cj + ny;
+            if (y < 0 || y > gridSize.y - 1)
+                continue;
+            
+            unordered_set<size_t> &gridSquare = _grid[x][y];
+            
+            for (size_t index : gridSquare) {
+                
+                FLSParticle *particle = &_liquid[index];
+                
+                float distance = GLKVector2Distance(particle->position, removalPosition);
+                
+                if (distance <= RADIUS) {
+                    candidatesForRemoval.push_back(index);
+                }
+            }
+        }
+    }
+    for (size_t i = 0; i < PARTICLE_ADD_REMOVE_RATE; i++) {
+        if (candidatesForRemoval.empty())
+            break;
+        int randomIndex = rand() % candidatesForRemoval.size();
+        swap(candidatesForRemoval[randomIndex], candidatesForRemoval.back());
+        size_t particleToRemoveIndex = candidatesForRemoval.back();
+        
+        FLSParticle *particleToRemove = &_liquid[particleToRemoveIndex];
+        int neighborCount = particleToRemove->neighborCount;
+        int neighbors[neighborCount];
+        
+        for (int i = 0; i < neighborCount; i++) {
+            neighbors[i] = particleToRemove->neighbors[i];
+        }
+        
+        _grid[particleToRemove->ci][particleToRemove->cj].erase(particleToRemoveIndex);
+        
+        *particleToRemove = {
+            .distances = {0},
+            .neighbors = {0},
+            .position = GLKVector2Make(0, 0),
+            .velocity = GLKVector2Make(0, 0),
+            .alive = NO,
+            .index = (int)particleToRemoveIndex,
+            .collisionFuzz = 0.0f,
+            .neighborCount = 0,
+            .ci = 0,
+            .cj = 0
+        };
+        
+        _activeParticles.erase(particleToRemoveIndex);
+        
+        for (int i = 0; i < neighborCount; i++) {
+            findNeighbors(_liquid[neighbors[i]]);
+        }
+        
+        candidatesForRemoval.pop_back();
+    }
+    int i = 0;
+    for (size_t index : _activeParticles) {
+        _activeParticlesGL[i] = (GLushort)index;
+        i++;
+    }
+}
+void flingParticles(float posX, float posY, float velX, float velY) {
+    
+    GLKVector2 flingPosition = GLKVector2Make(posX, posY);
+    
+    int ci = getGridX(posX);
+    int cj = getGridY(posY);
+    
+    unordered_set<size_t> candidatesForFling = unordered_set<size_t>();
+    
+    for (int nx = -2; nx < 3; nx++) {
+        
+        int x = ci + nx;
+        if (x < 0 || x > gridSize.x - 1)
+            continue;
+        
+        for (int ny = -2; ny < 3; ny++) {
+            
+            int y = cj + ny;
+            if (y < 0 || y > gridSize.y - 1)
+                continue;
+            
+            unordered_set<size_t> &gridSquare = _grid[x][y];
+            
+            for (size_t index : gridSquare) {
+                
+                FLSParticle *particle = &_liquid[index];
+                
+                float distance = GLKVector2Distance(particle->position, flingPosition);
+                
+                if (distance <= 1.5*RADIUS) {
+                    candidatesForFling.insert(index);
+                }
+            }
+        }
+    }
+    for (size_t index : candidatesForFling) {
+        
+        FLSParticle *particle = &_liquid[index];
+        
+        float distance = GLKVector2Distance(particle->position, flingPosition);
+        float flingMultiplier = ((1.5*RADIUS) - distance) / (3*RADIUS);
+        
+        GLKVector2 currentVel = GLKVector2MakeWithArray(particle->velocity.v);
+        
+        particle->velocity = GLKVector2Make(currentVel.x * (1 - flingMultiplier) + velX * flingMultiplier,
+                                            currentVel.y * (1 - flingMultiplier) + velY * flingMultiplier);
+        
+//        NSLog(@"Current Velocity: (%.3f, %.3f)", currentVel.x, currentVel.y);
+//        NSLog(@"Fling Velocity: (%.3f, %.3f)", velX, velY);
+        
     }
 }
 void applyLiquidConstraints() {
@@ -182,7 +318,7 @@ void applyLiquidConstraints() {
         for (int a = 0; a < particle->neighborCount; a++) {
             
             GLKVector2 relativePosition = GLKVector2Subtract(_scaledPositions[particle->neighbors[a]], _scaledPositions[index]);
-            float distanceSq = relativePosition.v[0] * relativePosition.v[0] + relativePosition.v[1] * relativePosition.v[1];
+            float distanceSq = relativePosition.x * relativePosition.x + relativePosition.y * relativePosition.y;
             
             //within idealRad check
             if (distanceSq < IDEAL_RADIUS_SQ) {
@@ -220,7 +356,7 @@ void applyLiquidConstraints() {
                 float factor = oneminusq * (pressure + presnear * oneminusq) / (2.0F * particle->distances[a]);
                 GLKVector2 d = GLKVector2MultiplyScalar(relativePosition, factor);
                 GLKVector2 relativeVelocity = GLKVector2Subtract(_scaledVelocities[particle->neighbors[a]], _scaledVelocities[index]);
-                factor = VISCOSITY * oneminusq * DT;
+                factor = feel_viscosity * oneminusq * DT;
                 d = GLKVector2Subtract(d, GLKVector2MultiplyScalar(relativeVelocity, factor));
                 _delta[particle->neighbors[a]] = GLKVector2Add(_delta[particle->neighbors[a]], d);
                 change = GLKVector2Subtract(change, d);
@@ -228,7 +364,7 @@ void applyLiquidConstraints() {
         }
         _delta[index] = GLKVector2Add(_delta[index], change);
         
-        particle->velocity = GLKVector2Add(particle->velocity, _gravity);
+        particle->velocity = GLKVector2Add(particle->velocity, GLKVector2MultiplyScalar(_gravity, DT * 60.0f));
         
     }
     
@@ -240,6 +376,10 @@ void applyLiquidConstraints() {
     }
     
     // Move particles
+    
+    GLKVector2 topVelocity = GLKVector2Make(0.0f, 0.0f);
+    float topVelSq = topVelocity.x * topVelocity.x + topVelocity.y * topVelocity.y;
+    
     for (size_t index : _activeParticles) {
         
         FLSParticle *particle = &_liquid[index];
@@ -247,11 +387,21 @@ void applyLiquidConstraints() {
         // Update velocity
         particle->velocity = GLKVector2Add(particle->velocity, _delta[index]);
         
+        if (particle->velocity.x * particle->velocity.x + particle->velocity.y * particle->velocity.y > topVelSq) {
+            topVelSq = particle->velocity.x * particle->velocity.x + particle->velocity.y * particle->velocity.y;
+            topVelocity = GLKVector2Make(particle->velocity.x, particle->velocity.y);
+        }
+        
         // Update position
         particle->position = GLKVector2Add(particle->position, _delta[index]);
-        particle->position = GLKVector2Add(particle->position, particle->velocity);
+        particle->position = GLKVector2Add(particle->position, GLKVector2MultiplyScalar(particle->velocity, DT * 60.0f));
         
     }
+//    float topVel = GLKVector2Length(topVelocity);
+//    if (topVel > allTimeTopVel) {
+//        allTimeTopVel = topVel;
+//        NSLog(@"%f", allTimeTopVel);
+//    }
     
     // Collisions
     for (size_t index : _activeParticles) {
@@ -281,7 +431,7 @@ void applyLiquidConstraints() {
 
         // For GL purposes
         _glParticles[particle->index].position = particle->position;
-        _glParticles[particle->index].velocity = GLKVector2Make(fabsf(particle->velocity.v[0]), fabsf(particle->velocity.v[1]));
+        _glParticles[particle->index].velocity = GLKVector2Make(fabsf(particle->velocity.x), fabsf(particle->velocity.y));
         
     }
     
@@ -330,8 +480,6 @@ void findNeighbors(FLSParticle &particle) {
                     particle.neighbors[particle.neighborCount] = (int)neighbourIndex;
                     particle.neighborCount++;
                     
-                    if (particle.neighborCount >= MAX_NEIGHBORS)
-                        return;
                 }
             }
         }
@@ -348,36 +496,50 @@ int getGridY(float y) {
     
     if ((self = [super init])) {
         
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, &defaultFBO);
+        lowestGridCell = GLKVector2Make(0, 0);
+        _gravity = GLKVector2Make(0, 0);
+        _glGravity = GLKVector2Make(0, 0);
+        
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
         
         _screenSize = screenSize;
         
         _worldBounds = GLKVector2Make(_screenSize.x/(2*scale), _screenSize.y/(2*scale));
         
         motionManager = [[CMMotionManager alloc] init];
-        motionManager.accelerometerUpdateInterval = DT * 2.0f;
+        motionManager.accelerometerUpdateInterval = GRAVITY_POLL_FREQUENCY;
         
+#ifndef FLS_DEBUG
         [motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
             
+            GLKVector3 gravity3D = GLKVector3Make(accelerometerData.acceleration.x,
+                                                  accelerometerData.acceleration.y,
+                                                  accelerometerData.acceleration.z);
             
-            _gravity = GLKVector2Make((accelerometerData.acceleration.x / 100.0f) * 0.5 + _gravity.x * 0.5,
-                                      (accelerometerData.acceleration.y / 100.0f) * 0.5 + _gravity.y * 0.5);
-            _gravity.x = _gravity.x > 1.0f ? 1.0f : _gravity.x < -1.0f ? -1.0f : _gravity.x;
-            _gravity.y = _gravity.y > 1.0f ? 1.0f : _gravity.y < -1.0f ? -1.0f : _gravity.y;
+            _gravity = GLKVector2Make(gravity3D.x / 40.0f * feel_gravity, gravity3D.y / 40.0f * feel_gravity);
             
+            if ((gravity3D.x * gravity3D.x) + (gravity3D.y * gravity3D.y) + (gravity3D.z * gravity3D.z) > 1.0f) {
+                gravity3D = GLKVector3Normalize(gravity3D);
+            }
+            
+            _glGravity = GLKVector2Make(gravity3D.x * 0.5 + _glGravity.x * 0.5,
+                                        gravity3D.y * 0.5 + _glGravity.y * 0.5);
             
         }];
+#else
+        _gravity = GLKVector2Make(0.0f, -0.01f);
+//        _gravity = GLKVector2Make(0.00005f, -0.00005f);
+#endif
         
-        if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)] &&
-            ([UIScreen mainScreen].scale == 2.0))
+        if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
         {
-            retinaScale = 2.0f;
+            retinaScale = [UIScreen mainScreen].scale;
         } else {
             retinaScale = 1.0f;
         }
         
         [self loadShaders];
-        [self loadParticleTexture:@"Particle64.png"];
+        [self loadParticleTexture:@"Particle.png"];
         [self setupRTT];
         
         _activeParticles = unordered_set<size_t>();
@@ -400,6 +562,7 @@ int getGridY(float y) {
                 .velocity = GLKVector2Make(0, 0),
                 .alive = NO,
                 .index = i,
+                .collisionFuzz = 0.0f,
                 .neighborCount = 0,
                 .ci = 0,
                 .cj = 0
@@ -418,8 +581,12 @@ int getGridY(float y) {
     return self;
     
 }
+-(void)setupGLAndAccelerometer {
+    
+}
 -(void)update {
     
+    applyLiquidConstraints();
     applyLiquidConstraints();
     
 }
@@ -470,7 +637,8 @@ int getGridY(float y) {
     // 4
     // Draw particles
     
-    glDrawArrays(GL_POINTS, 0, (int)_activeParticles.size());
+//    glDrawArrays(GL_POINTS, 0, (int)_activeParticles.size());
+    glDrawElements(GL_POINTS, (int)_activeParticles.size(), GL_UNSIGNED_SHORT, _activeParticlesGL);
     glDisableVertexAttribArray(self.liquidParticleShader.aPosition);
     glDisableVertexAttribArray(self.liquidParticleShader.aVelocity);
     
@@ -485,7 +653,22 @@ int getGridY(float y) {
     glBindTexture(GL_TEXTURE_2D, postTexture);
     glUniform1i(self.liquidPostShader.fbo_texture, /*GL_TEXTURE*/0);
     glUniform2fv(self.liquidPostShader.uScreenSize, 1, _screenSize.v);
-    glUniform2f(self.liquidPostShader.uGravity, _gravity.x * 100, _gravity.y * 100);
+    
+    float gravityLen = GLKVector2Length(_glGravity);
+    float shimmerMultiplierLen = cbrt(gravityLen);
+    
+    GLKVector2 shimmerMultiplier = GLKVector2MultiplyScalar(_glGravity, shimmerMultiplierLen / gravityLen);
+    
+    glUniform2fv(self.liquidPostShader.uGravity, 1, _glGravity.v);
+    glUniform2fv(self.liquidPostShader.uShimmer, 1, shimmerMultiplier.v);
+    
+    glUniform3fv(self.liquidPostShader.uLook_BaseColor, 1, look_baseColor.v);
+    glUniform1f(self.liquidPostShader.uLook_Clarity, look_clarity);
+    glUniform1f(self.liquidPostShader.uLook_Shimmer, look_shimmer);
+    glUniform1f(self.liquidPostShader.uLook_Foam, look_foam);
+    
+//    NSLog(@"(%f, %f) vs. (%f, %f)", gravity.x, gravity.y, scaledGravity.x, scaledGravity.y);
+    
     glEnableVertexAttribArray(self.liquidPostShader.v_coord);
     
     glBindBuffer(GL_ARRAY_BUFFER, postTextureVBO);
@@ -518,8 +701,8 @@ int getGridY(float y) {
     glBindBuffer(GL_ARRAY_BUFFER, particleBuffer);      // Bind particle buffer
     glBufferData(                                       // Fill bound buffer with particles
                  GL_ARRAY_BUFFER,                       // Buffer target
-                 sizeof(_glParticles),                       // Buffer data size
-                 _glParticles,                               // Buffer data pointer
+                 sizeof(_glParticles),                  // Buffer data size
+                 _glParticles,                          // Buffer data pointer
                  GL_DYNAMIC_DRAW);                      // Usage - Data changes
     
     GLfloat fbo_vertices[] = {
@@ -586,16 +769,45 @@ int getGridY(float y) {
         NSLog(@"Error loading file: %@", [error localizedDescription]);
     }
 }
--(void)createParticleWithPosX:(float)posX posY:(float)posY {
+-(void)addFluidAtPosX:(float)posX posY:(float)posY {
     
-    createParticle((posX - _screenSize.x/2)/scale, (_screenSize.y/2 - posY)/scale);
+    createParticles((posX - _screenSize.x/2)/scale, (_screenSize.y/2 - posY)/scale);
+    
+}
+-(void)removeFluidAtPosX:(float)posX posY:(float)posY {
+    
+    removeParticles((posX - _screenSize.x/2)/scale, (_screenSize.y/2 - posY)/scale);
+    
+}
+-(void)flingFluidAtPosX:(float)posX posY:(float)posY withVelX:(float)velX velY:(float)velY {
+    
+    flingParticles((posX - _screenSize.x/2)/scale, (_screenSize.y/2 - posY)/scale,
+                   -velX / scale, velY / scale);
+    
+}
+-(FLSTouchOperation)operationForTouch:(float)posX posY:(float)posY {
+    
+    float worldX = (posX - _screenSize.x/2) / scale;
+    float worldY = (_screenSize.y/2 - posY) / scale;
+    
+    int ci = getGridX(worldX);
+    int cj = getGridY(worldY);
+    
+    unordered_set<size_t> &gridSquare = _grid[ci][cj];
+            
+    if (gridSquare.empty())
+        return FLSTouchAddFluid;
+    else
+        return FLSTouchRemoveFluid;
     
 }
 -(void)dealloc {
     
-    glDeleteTextures(1, &postTexture);
-    glDeleteFramebuffers(1, &postFramebuffer);
-    glDeleteBuffers(1, &postTextureVBO);
+//    glDeleteBuffers(1, &particleBuffer);
+//    glDeleteBuffers(1, &postTextureVBO);
+//    glDeleteTextures(1, &postTexture);
+//    glDeleteRenderbuffers(1, &postDepthBuffer);
+//    glDeleteFramebuffers(1, &postFramebuffer);
     
 }
 
