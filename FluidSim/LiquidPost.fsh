@@ -60,11 +60,11 @@ static const char* LiquidPostFS = STRINGIFY
     
     highp float top = texture.x;
     top -= texture2D(fbo_texture, vec2(f_texcoord.x - (uLook_Shimmer * uShimmer.x * pxSize.x), f_texcoord.y - (uLook_Shimmer * uShimmer.y * pxSize.y))).x;
-    top = step(0.7, top) * top;
+    top = step(0.67,top) * 0.25 + step(0.68,top) * 0.25 + step(0.69,top) * 0.25 + step(0.7,top) * 0.25;
     
 //    highp vec4 color = vec4((0.15 + speed + top) * scattering, (0.25 + speed + top) * scattering, (0.7 + speed + top) * scattering, step(0.7,texture.x));
-    highp vec4 color = vec4((uLook_BaseColor.x + speed + top) * scattering, (uLook_BaseColor.y + speed + top) * scattering, (uLook_BaseColor.z + speed + top) * scattering, step(0.7,texture.x));
-    gl_FragColor = color;
+    highp float transparency = step(0.67,texture.x) * 0.25 + step(0.68,texture.x) * 0.25 + step(0.69,texture.x) * 0.25 + step(0.7,texture.x) * 0.25;
+    gl_FragColor = vec4((uLook_BaseColor.x + speed + top) * scattering, (uLook_BaseColor.y + speed + top) * scattering, (uLook_BaseColor.z + speed + top) * scattering, transparency);
 //    gl_FragColor = vec4(f_texcoord*10.0, 0.0, 0.0);
 //    gl_FragColor = vec4(uLook_BaseColor, 1.0);
 //    gl_FragColor = texture;

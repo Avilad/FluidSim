@@ -2,8 +2,8 @@
 //  FLSAppDelegate.m
 //  FluidSim
 //
-//  Created by SlEePlEs5 on 1/28/14.
-//  Copyright (c) 2014 SlEePlEs5. All rights reserved.
+//  Created by Avilad on 1/28/14.
+//  Copyright (c) 2014 Avilad. All rights reserved.
 //
 
 #import "FLSAppDelegate.h"
@@ -20,7 +20,7 @@
     // LOOK
     look_baseColor = GLKVector3Make(0.07f, 0.15f, 0.45f); // RANGE: (0.0f, 0.0f, 0.0f) - (1.0f, 1.0f, 1.0f)
     look_clarity = 0.3f; // RANGE: 0.0f - 1.0f
-    look_shimmer = 12.0f; // RANGE: 0.0f, 10.0f - 15.0f
+    look_shimmer = 10.0f; // RANGE: 0.0f, 8.0f - 13.0f
     look_foam = 0.5f; // RANGE: 0.0f - 1.0f
     
     // FEEL

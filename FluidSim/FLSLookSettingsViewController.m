@@ -2,8 +2,8 @@
 //  FLSLookSettingsViewController.m
 //  FluidSim
 //
-//  Created by SlEePlEs5 on 12/29/14.
-//  Copyright (c) 2014 SlEePlEs5. All rights reserved.
+//  Created by Avilad on 12/29/14.
+//  Copyright (c) 2014 Avilad. All rights reserved.
 //
 
 #import "FLSLookSettingsViewController.h"
@@ -29,7 +29,7 @@
     [self.look_clarityPercentLabel setText:[NSString stringWithFormat:@"%i%%", (int)(look_clarity * 100.0f)]];
     [self.look_claritySlider setValue:look_clarity];
     
-    float unscaledShimmer = (look_shimmer < 10.0f) ? 0.0f : ((look_shimmer - 10.0f) / 5.0f);
+    float unscaledShimmer = (look_shimmer < 8.0f) ? 0.0f : ((look_shimmer - 8.0f) / 5.0f);
     [self.look_shimmerPercentLabel setText:[NSString stringWithFormat:@"%i%%", (int)(unscaledShimmer * 100.0f)]];
     [self.look_shimmerSlider setValue:unscaledShimmer];
     
@@ -49,7 +49,7 @@
     if (sliderValue == 0.0f)
         look_shimmer = 0.0f;
     else
-        look_shimmer = 5.0f * sliderValue + 10.0f;
+        look_shimmer = 5.0f * sliderValue + 8.0f;
 }
 - (IBAction)look_foamSliderChanged
 {

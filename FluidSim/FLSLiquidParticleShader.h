@@ -2,8 +2,8 @@
 //  FLSLiquidParticleShader.h
 //  FluidSim
 //
-//  Created by SlEePlEs5 on 2/4/14.
-//  Copyright (c) 2014 SlEePlEs5. All rights reserved.
+//  Created by Avilad on 2/4/14.
+//  Copyright (c) 2014 Avilad. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
